@@ -1,0 +1,5 @@
+.idea
+pkg
+RemoteSyslog.iml
+src/github.com/op/go-logging
+
