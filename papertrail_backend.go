@@ -1,7 +1,7 @@
 package RemoteSyslog
 
 import (
-	"github.com/op/go-logging"
+	"../..//op/go-logging"
 	"time"
 	"os"
 	"errors"
