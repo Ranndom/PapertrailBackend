@@ -1,12 +1,12 @@
 package RemoteSyslog
 
 import (
-	"../..//op/go-logging"
 	"time"
 	"os"
 	"errors"
 	"net"
 	"strconv"
+	"github.com/op/go-logging"
 )
 
 type PapertrailBackend struct {
@@ -26,7 +26,7 @@ type PapertrailBackend struct {
 	raddr                  string
 }
 
-func NewPapertrailBackend(config *PapertrailBackend) (*PapertrailBackend) {
+func NewPapertrailBackend(config *PapertrailBackend) (*PapertrailBackend, error) {
 	if config.ClientHostname == "" {
 		hostname, err := os.Hostname()
 		if err != nil {
@@ -58,7 +58,7 @@ func NewPapertrailBackend(config *PapertrailBackend) (*PapertrailBackend) {
 	case "tcp":
 		config.Network = "tcp"
 	default:
-		return errors.New("Invalid Network. Neither UDP nor TCP.")
+		return nil, errors.New("Invalid Network. Neither UDP nor TCP.")
 	}
 
 	config.raddr = net.JoinHostPort(config.Hostname, strconv.Itoa(config.Port))
@@ -66,13 +66,13 @@ func NewPapertrailBackend(config *PapertrailBackend) (*PapertrailBackend) {
 	var err error
 	config.Logger, err = Dial(config.ClientHostname, config.Network, config.raddr, nil, config.connectTimeoutDuration, config.writeTimeoutDuration, 99990)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return config
+	return config, nil
 }
 
-func (w *PapertrailBackend) Crit(line []byte) (error) {
+func (w *PapertrailBackend) Crit(line string) (error) {
 	w.Logger.Packets <- Packet{
 		SevCrit,
 		LogLocal0,
@@ -85,7 +85,7 @@ func (w *PapertrailBackend) Crit(line []byte) (error) {
 	return nil
 }
 
-func (w *PapertrailBackend) Err(line []byte) (error) {
+func (w *PapertrailBackend) Err(line string) (error) {
 	w.Logger.Packets <- Packet{
 		SevErr,
 		LogLocal0,
@@ -98,7 +98,7 @@ func (w *PapertrailBackend) Err(line []byte) (error) {
 	return nil
 }
 
-func (w *PapertrailBackend) Warning(line []byte) (error) {
+func (w *PapertrailBackend) Warning(line string) (error) {
 	w.Logger.Packets <- Packet{
 		SevWarning,
 		LogLocal0,
@@ -111,7 +111,7 @@ func (w *PapertrailBackend) Warning(line []byte) (error) {
 	return nil
 }
 
-func (w *PapertrailBackend) Notice(line []byte) (error) {
+func (w *PapertrailBackend) Notice(line string) (error) {
 	w.Logger.Packets <- Packet{
 		SevNotice,
 		LogLocal0,
@@ -124,7 +124,7 @@ func (w *PapertrailBackend) Notice(line []byte) (error) {
 	return nil
 }
 
-func (w *PapertrailBackend) Info(line []byte) (error) {
+func (w *PapertrailBackend) Info(line string) (error) {
 	w.Logger.Packets <- Packet{
 		SevInfo,
 		LogLocal0,
@@ -137,7 +137,7 @@ func (w *PapertrailBackend) Info(line []byte) (error) {
 	return nil
 }
 
-func (w *PapertrailBackend) Debug(line []byte) (error) {
+func (w *PapertrailBackend) Debug(line string) (error) {
 	w.Logger.Packets <- Packet{
 		SevDebug,
 		LogLocal0,
